@@ -155,7 +155,7 @@
 
         .faq-content-wrapper {
             display: grid;
-            grid-template-rows: 0fr; /* закрыто */
+            grid-template-rows: 0fr;
             transition: grid-template-rows var(--transition);
         }
 
@@ -189,7 +189,6 @@
             stroke: var(--tg-blue);
         }
 
-        /* Overlay для Create a Support Ticket */
         .ticket-overlay {
             position: fixed;
             inset: 0;
@@ -336,7 +335,6 @@
     </div>
 </main>
 
-<!-- Overlay для Create a Support Ticket -->
 <div class="ticket-overlay" id="ticketOverlay">
     <div class="ticket-card">
         <img src="" alt="Avatar" class="avatar" id="ticketAvatar">
@@ -346,7 +344,7 @@
     </div>
 </div>
 
-<!-- Telegram Login Widget -->
+<!-- Telegram Login Widget для обычного браузера -->
 <script async src="https://telegram.org/js/telegram-widget.js?7"
         data-telegram-login="YOUR_BOT_USERNAME"
         data-size="small"
@@ -358,19 +356,32 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('show');
+
+    // Автоматически подтягиваем пользователя из миниаппа Telegram
+    if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+    }
 });
 
 let telegramUser = null;
 
+// Для обычного виджета Telegram
 function onTelegramAuth(user) {
     telegramUser = user;
 }
 
+// Кнопка создания тикета
 document.querySelector('.cta-pill').addEventListener('click', () => {
+    // Если telegramUser не установлен, проверяем WebApp
+    if (!telegramUser && window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        telegramUser = window.Telegram.WebApp.initDataUnsafe.user;
+    }
+
     if (!telegramUser) {
         alert("Please login via Telegram first!");
         return;
     }
+
     document.getElementById('ticketAvatar').src = telegramUser.photo_url || '';
     document.getElementById('ticketName').innerText = `Is it you, ${telegramUser.first_name}?`;
     document.getElementById('ticketOverlay').classList.add('show');
